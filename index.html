@@ -25,7 +25,7 @@
         .channel-select {
             width: 100%;
             padding: 10px;
-            margin-bottom: 90px;
+            margin-bottom: 10px;
             border: 1px solid #ccc;
             border-radius: 4px;
         }
@@ -202,6 +202,22 @@
                 overflow-x: auto;
             }
         }
+
+        .note {
+            margin: 0 0 50px 0;
+            padding: 8px 12px;
+            background-color: #fff3cd;
+            border: 1px solid #ffeeba;
+            border-radius: 4px;
+            color: #856404;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .note i {
+            margin-right: 6px;
+            font-style: normal;
+        }
     </style>
 </head>
 <body>
@@ -233,6 +249,11 @@
             <option value="161">161</option>
             <option value="165">165</option>
         </select>
+
+        <div class="note">
+            <i>⚠️</i>Note: This diagram displays only the channels selected in Auto Channel Candidates - Manual Selects above. 
+            The diagram itself is not interactive; please use the selection box to modify channel choices.
+        </div>
 
         <div class="diagram">
             <div class="band-headers">
