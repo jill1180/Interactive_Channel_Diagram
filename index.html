@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Channel Diagram</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+        :root {
+          --main-bg-color: rgba(210,210,210,0.7);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+
+        .channel-select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 90px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .diagram {
+            position: relative;
+/*            overflow-x: auto;*/
+            padding-bottom: 40px;
+        }
+
+        .band-headers {
+            display: flex;
+            margin-bottom: 6px;
+            padding-left: 80px;
+            color: #666;
+            min-width: 900px;
+        }
+
+        .band-header {
+/*            flex: 1;*/
+            z-index: 10;
+            margin-right: 5px;
+        }
+
+        .band-header.unii1, .unii1::before {
+            width: 124px;
+        }
+        .band-header.unii12a, .unii12a::before {
+            width: 124px;
+        }
+        .band-header.unii2c, .unii2c::before {
+            width: 377px;
+        }
+        .band-header.unii3, .unii3::before {
+            width: 124px;
+        }
+
+        .band-header::before {
+            border-top: 1px solid gray;
+            content: "";
+            position: absolute;
+            top: 16px;
+        }
+
+        .channel-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            min-width: 900px;
+/*            position: relative;*/
+        }
+
+        .row-label {
+            width: 80px;
+            font-size: 14px;
+            color: #666;
+            flex-shrink: 0;
+        }
+
+        .channels {
+            display: flex;
+            flex: 1;
+            gap: 4px; /* 間隔 */
+        }
+
+        /* DFS Channels BG */
+        .dfs-background {
+            position: absolute;
+            left: 21.5%;
+            width: 53%;
+            height: 70%;
+            background: linear-gradient(to top, rgb(255 190 120 / 30%), rgb(255 160 80 / 0%));
+            z-index: 1;
+            top: 13%;
+            border-bottom: 1px solid #ff8c00;
+        }
+
+        .dfs-label {
+            position: absolute;
+            bottom: 10px;
+            left: 22%;
+            width: 53%;
+            text-align: center;
+            color: #ff8c00;
+            font-size: 14px;
+        }
+
+        /* Channel width setting */
+        .channel-group {
+            display: flex;
+            width: 60px; /* 縮減寬度 */
+            gap: 4px; /* 統一間隔 */
+        }
+
+        .channel-20mhz {
+            flex: 1;
+            height: 32px;
+            background: var(--main-bg-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+            position: relative;
+            z-index: 2;
+            width: 28px; /* (60px - 4px) / 2 */
+        }
+
+        .channel-40mhz {
+            width: 60px; /* 對應兩個 20MHz Width */
+            height: 32px;
+            background: var(--main-bg-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+            position: relative;
+            z-index: 2;
+        }
+
+        .channel-80mhz {
+            width: 124px; /* (60px * 2) + 4px */
+            height: 32px;
+            background: var(--main-bg-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+            position: relative;
+            z-index: 2;
+        }
+
+        .active {
+            background: #4ade80;
+        }
+
+        .weather-radar {
+            position: absolute;
+            right: 38.5%;
+            top: -20px;
+            width: 10%;
+            height: calc(100% - 30px);
+            background: linear-gradient(to bottom, rgb(255 200 200 / 60%), rgb(255 200 200 / 0%));
+            pointer-events: none;
+            z-index: 1;
+            border-top: 1px solid #ff6b6b;
+        }
+
+        .weather-radar::before {
+          content: "Weather Radar";
+          top: -20px;
+          position: absolute;
+          text-align: center;
+          left: 0%;
+          color: #ff6b6b;
+        }
+
+        @media (max-width: 1000px) {
+            .diagram {
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <select class="channel-select" multiple size="5" id="channelSelect">
+            <option value="36">36</option>
+            <option value="40">40</option>
+            <option value="44">44</option>
+            <option value="48">48</option>
+            <option value="52">52</option>
+            <option value="56">56</option>
+            <option value="60">60</option>
+            <option value="64">64</option>
+            <option value="100">100</option>
+            <option value="104">104</option>
+            <option value="108">108</option>
+            <option value="112">112</option>
+            <option value="116">116</option>
+            <option value="120">120</option>
+            <option value="124">124</option>
+            <option value="128">128</option>
+            <option value="132">132</option>
+            <option value="136">136</option>
+            <option value="140">140</option>
+            <option value="144">144</option>
+            <option value="149">149</option>
+            <option value="153">153</option>
+            <option value="157">157</option>
+            <option value="161">161</option>
+            <option value="165">165</option>
+        </select>
+
+        <div class="diagram">
+            <div class="band-headers">
+                <div class="band-header unii1">U-NII-1</div>
+                <div class="band-header unii12a">U-NII-2a</div>
+                <div class="band-header unii2c">U-NII-2 Extended</div>
+                <div class="band-header unii3">U-NII-3</div>
+            </div>
+
+            <div class="channel-row">
+                <div class="row-label">20 MHz</div>
+                <div class="channels" id="channels20MHz">
+                    <!-- 20MHz channels will be generated here -->
+                </div>
+                <div class="dfs-background"></div>
+                <div class="dfs-label">DFS Channels</div>
+            </div>
+
+            <div class="channel-row">
+                <div class="row-label">40 MHz</div>
+                <div class="channels" id="channels40MHz">
+                    <div class="channel-40mhz" id="channel38">38</div>
+                    <div class="channel-40mhz" id="channel46">46</div>
+                    <div class="channel-40mhz" id="channel54">54</div>
+                    <div class="channel-40mhz" id="channel62">62</div>
+                    <div class="channel-40mhz" id="channel102">102</div>
+                    <div class="channel-40mhz" id="channel110">110</div>
+                    <div class="channel-40mhz" id="channel118">118</div>
+                    <div class="channel-40mhz" id="channel126">126</div>
+                    <div class="channel-40mhz" id="channel134">134</div>
+                    <div class="channel-40mhz" id="channel142">142</div>
+                    <div class="channel-40mhz" id="channel151">151</div>
+                    <div class="channel-40mhz" id="channel159">159</div>
+                </div>
+            </div>
+
+            <div class="channel-row">
+                <div class="row-label">80 MHz</div>
+                <div class="channels" id="channels80MHz">
+                    <div class="channel-80mhz" id="channel42">42</div>
+                    <div class="channel-80mhz" id="channel58">58</div>
+                    <div class="channel-80mhz" id="channel106">106</div>
+                    <div class="channel-80mhz" id="channel122">122</div>
+                    <div class="channel-80mhz" id="channel138">138</div>
+                    <div class="channel-80mhz" id="channel155">155</div>
+                </div>
+            </div>
+
+            <div class="weather-radar"></div>
+        </div>
+    </div>
+
+    <script>
+        const channelSelect = document.getElementById('channelSelect');
+        const channels20MHz = document.getElementById('channels20MHz');
+
+        // Channel pairs for 40MHz activation
+        const channelPairs40MHz = {
+            '38': ['36', '40'],
+            '46': ['44', '48'],
+            '54': ['52', '56'],
+            '62': ['60', '64'],
+            '102': ['100', '104'],
+            '110': ['108', '112'],
+            '118': ['116', '120'],
+            '126': ['124', '128'],
+            '134': ['132', '136'],
+            '142': ['140', '144'],
+            '151': ['149', '153'],
+            '159': ['157', '161']
+        };
+
+        // Channel groups for 80MHz activation
+        const channelGroups80MHz = {
+            '42': ['36', '40', '44', '48'],
+            '58': ['52', '56', '60', '64'],
+            '106': ['100', '104', '108', '112'],
+            '122': ['116', '120', '124', '128'],
+            '138': ['132', '136', '140', '144'],
+            '155': ['149', '153', '157', '161']
+        };
+
+        // Generate 20MHz channels
+        const generateChannels = () => {
+            const channelNumbers = [36, 40, 44, 48, 52, 56, 60, 64, 100, 104, 108, 112, 
+                                  116, 120, 124, 128, 132, 136, 140, 144, 149, 153, 157, 161];
+            
+            // 將頻道分組顯示
+            for (let i = 0; i < channelNumbers.length; i += 2) {
+                const group = document.createElement('div');
+                group.className = 'channel-group';
+                
+                const channel1 = document.createElement('div');
+                channel1.className = 'channel-20mhz';
+                channel1.textContent = channelNumbers[i];
+                channel1.id = `channel${channelNumbers[i]}`;
+                
+                const channel2 = document.createElement('div');
+                channel2.className = 'channel-20mhz';
+                channel2.textContent = channelNumbers[i + 1];
+                channel2.id = `channel${channelNumbers[i + 1]}`;
+                
+                group.appendChild(channel1);
+                group.appendChild(channel2);
+                channels20MHz.appendChild(group);
+            }
+        };
+
+        // Check if all channels in an array are selected
+        const areChannelsSelected = (channels, selectedValues) => {
+            return channels.every(channel => selectedValues.includes(Number(channel)));
+        };
+
+        // Update channels based on selection
+        const updateChannels = () => {
+            const selectedValues = Array.from(channelSelect.selectedOptions).map(option => Number(option.value));
+
+            // Update 20MHz channels
+            document.querySelectorAll('.channel-20mhz').forEach(channel => {
+                const channelNum = Number(channel.textContent);
+                channel.classList.toggle('active', selectedValues.includes(channelNum));
+            });
+
+            // Update 40MHz channels
+            Object.entries(channelPairs40MHz).forEach(([channel40MHz, requiredChannels]) => {
+                const channel40Element = document.getElementById(`channel${channel40MHz}`);
+                if (channel40Element) {
+                    channel40Element.classList.toggle('active', 
+                        areChannelsSelected(requiredChannels, selectedValues));
+                }
+            });
+
+            // Update 80MHz channels
+            Object.entries(channelGroups80MHz).forEach(([channel80MHz, requiredChannels]) => {
+                const channel80Element = document.getElementById(`channel${channel80MHz}`);
+                if (channel80Element) {
+                    channel80Element.classList.toggle('active', 
+                        areChannelsSelected(requiredChannels, selectedValues));
+                }
+            });
+        };
+
+        // Initialize
+        generateChannels();
+        channelSelect.addEventListener('change', updateChannels);
+    </script>
+</body>
+</html>
