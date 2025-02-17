@@ -32,7 +32,6 @@
 
         .diagram {
             position: relative;
-/*            overflow-x: auto;*/
             padding-bottom: 40px;
         }
 
@@ -45,7 +44,6 @@
         }
 
         .band-header {
-/*            flex: 1;*/
             z-index: 10;
             margin-right: 5px;
         }
@@ -60,7 +58,7 @@
             width: 377px;
         }
         .band-header.unii3, .unii3::before {
-            width: 124px;
+            width: 155px;
         }
 
         .band-header::before {
@@ -75,7 +73,6 @@
             align-items: center;
             margin-bottom: 15px;
             min-width: 900px;
-/*            position: relative;*/
         }
 
         .row-label {
@@ -88,10 +85,9 @@
         .channels {
             display: flex;
             flex: 1;
-            gap: 4px; /* 間隔 */
+            gap: 4px;
         }
 
-        /* DFS Channels BG */
         .dfs-background {
             position: absolute;
             left: 21.5%;
@@ -113,11 +109,10 @@
             font-size: 14px;
         }
 
-        /* Channel width setting */
         .channel-group {
             display: flex;
-            width: 60px; /* 縮減寬度 */
-            gap: 4px; /* 統一間隔 */
+/*            width: 60px;*/
+            gap: 4px;
         }
 
         .channel-20mhz {
@@ -132,11 +127,11 @@
             transition: background-color 0.3s;
             position: relative;
             z-index: 2;
-            width: 28px; /* (60px - 4px) / 2 */
+            width: 28px;
         }
 
         .channel-40mhz {
-            width: 60px; /* 對應兩個 20MHz Width */
+            width: 60px;
             height: 32px;
             background: var(--main-bg-color);
             display: flex;
@@ -150,7 +145,21 @@
         }
 
         .channel-80mhz {
-            width: 124px; /* (60px * 2) + 4px */
+            width: 124px;
+            height: 32px;
+            background: var(--main-bg-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+            position: relative;
+            z-index: 2;
+        }
+
+        .channel-160mhz {
+            width: 252px;
             height: 32px;
             background: var(--main-bg-color);
             display: flex;
@@ -272,6 +281,14 @@
                 </div>
             </div>
 
+            <div class="channel-row">
+                <div class="row-label">160 MHz</div>
+                <div class="channels" id="channels160MHz">
+                    <div class="channel-160mhz" id="channel50">50</div>
+                    <div class="channel-160mhz" id="channel114">114</div>
+                </div>
+            </div>
+
             <div class="weather-radar"></div>
         </div>
     </div>
@@ -306,13 +323,22 @@
             '155': ['149', '153', '157', '161']
         };
 
+        // Channel groups for 160MHz activation
+        const channelGroups160MHz = {
+            '50': ['36', '40', '44', '48', '52', '56', '60', '64'],
+            '114': ['100', '104', '108', '112', '116', '120', '124', '128']
+        };
+
         // Generate 20MHz channels
         const generateChannels = () => {
-            const channelNumbers = [36, 40, 44, 48, 52, 56, 60, 64, 100, 104, 108, 112, 
-                                  116, 120, 124, 128, 132, 136, 140, 144, 149, 153, 157, 161];
+            const channelNumbers = [
+                36, 40, 44, 48, 52, 56, 60, 64,
+                100, 104, 108, 112, 116, 120, 124, 128,
+                132, 136, 140, 144, 149, 153, 157, 161, 165
+            ];
             
-            // 將頻道分組顯示
-            for (let i = 0; i < channelNumbers.length; i += 2) {
+            // Special handling for the last channel (165) since it's alone
+            for (let i = 0; i < channelNumbers.length - 1; i += 2) {
                 const group = document.createElement('div');
                 group.className = 'channel-group';
                 
@@ -330,6 +356,18 @@
                 group.appendChild(channel2);
                 channels20MHz.appendChild(group);
             }
+
+            // Add channel 165 separately
+            const lastGroup = document.createElement('div');
+            lastGroup.className = 'channel-group';
+            
+            const lastChannel = document.createElement('div');
+            lastChannel.className = 'channel-20mhz';
+            lastChannel.textContent = '165';
+            lastChannel.id = 'channel165';
+            
+            lastGroup.appendChild(lastChannel);
+            channels20MHz.appendChild(lastGroup);
         };
 
         // Check if all channels in an array are selected
@@ -361,6 +399,15 @@
                 const channel80Element = document.getElementById(`channel${channel80MHz}`);
                 if (channel80Element) {
                     channel80Element.classList.toggle('active', 
+                        areChannelsSelected(requiredChannels, selectedValues));
+                }
+            });
+
+            // Update 160MHz channels
+            Object.entries(channelGroups160MHz).forEach(([channel160MHz, requiredChannels]) => {
+                const channel160Element = document.getElementById(`channel${channel160MHz}`);
+                if (channel160Element) {
+                    channel160Element.classList.toggle('active', 
                         areChannelsSelected(requiredChannels, selectedValues));
                 }
             });
